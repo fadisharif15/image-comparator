@@ -174,8 +174,8 @@ class ImageComparatorTest extends TestCase
 
     public function testCompareSerializedHashes(): void
     {
-        $image1 = 'https://fastly.picsum.photos/id/62/536/354.jpg?hmac=64B9dwwBWD36xbpWQveOIHXAHZUS-tfAXAlZz7QHc34';
-        $image2 = 'https://fastly.picsum.photos/id/62/536/354.jpg?hmac=64B9dwwBWD36xbpWQveOIHXAHZUS-tfAXAlZz7QHc34';
+        $image1 = 'tests/images/forest1.jpg';
+        $image2 = 'tests/images/forest1-copyrighted.jpg';
 
         $serializedHash1 = $this->imageComparator->serializeImageHash($image1);
         $serializedHash2 = $this->imageComparator->serializeImageHash($image2);
