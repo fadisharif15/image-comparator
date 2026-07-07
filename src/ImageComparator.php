@@ -45,13 +45,12 @@ class ImageComparator
      * @throws NumberFormatException|ImageResourceException
      */
     public function compare(
-        GdImage|string     $sourceImage,
-        GdImage|string     $comparedImage,
+        GdImage|string $sourceImage,
+        GdImage|string $comparedImage,
         ImageRotationAngle $rotation = ImageRotationAngle::D0,
-        int                $precision = 3
-    ): float
-    {
-        $sourcePayload   = $this->normalizeComparableInput($sourceImage);
+        int $precision = 3
+    ): float {
+        $sourcePayload = $this->normalizeComparableInput($sourceImage);
         $comparedPayload = $this->normalizeComparableInput($comparedImage, $rotation);
         $similarityColor = $this->calculateSimilarity($sourcePayload['color'], $comparedPayload['color']);
 
@@ -71,12 +70,11 @@ class ImageComparator
      * @throws NumberFormatException|ImageResourceException
      */
     public function compareArray(
-        GdImage|string     $sourceImage,
-        array              $images,
+        GdImage|string $sourceImage,
+        array $images,
         ImageRotationAngle $rotation = ImageRotationAngle::D0,
-        int                $precision = 3
-    ): array
-    {
+        int $precision = 3
+    ): array {
         $similarityPercentages = [];
 
         foreach ($images as $key => $comparedImage) {
@@ -98,8 +96,8 @@ class ImageComparator
      */
     public function serializeImageHash(GdImage|string $image, int $size = 8): string
     {
-        $hashBits     = $this->hashImage($image, ImageRotationAngle::D0, $size);
-        $hashString   = $this->convertHashToBinaryString($hashBits);
+        $hashBits = $this->hashImage($image, ImageRotationAngle::D0, $size);
+        $hashString = $this->convertHashToBinaryString($hashBits);
         $averageColor = $this->getAverageRGB($image, $size);
 
         return sprintf(
@@ -153,9 +151,8 @@ class ImageComparator
     public function detect(
         GdImage|string $sourceImage,
         GdImage|string $comparedImage,
-        int            $precision = 3
-    ): float
-    {
+        int $precision = 3
+    ): float {
         $highestSimilarityPercentage = 0;
 
         foreach (ImageRotationAngle::cases() as $rotation) {
@@ -208,18 +205,17 @@ class ImageComparator
      * @throws NumberFormatException|ImageResourceException
      */
     public function hashImage(
-        GdImage|string     $image,
+        GdImage|string $image,
         ImageRotationAngle $rotation = ImageRotationAngle::D0,
-        int                $size = 8
-    ): array
-    {
-        $image       = $this->normalizeAsResource($image);
+        int $size = 8
+    ): array {
+        $image = $this->normalizeAsResource($image);
         $imageCached = imagecreatetruecolor($size, $size);
 
         imagecopyresampled($imageCached, $image, 0, 0, 0, 0, $size, $size, imagesx($image), imagesy($image));
         imagecopymergegray($imageCached, $image, 0, 0, 0, 0, $size, $size, 50);
 
-        $width  = imagesx($imageCached);
+        $width = imagesx($imageCached);
         $height = imagesy($imageCached);
 
         $pixels = $this->processImagePixels($imageCached, $size, $height, $width, $rotation);
@@ -241,27 +237,27 @@ class ImageComparator
     {
         $imageResource = $this->normalizeAsResource($image);
 
-        $width  = BigDecimal::of(imagesx($imageResource));
+        $width = BigDecimal::of(imagesx($imageResource));
         $height = BigDecimal::of(imagesy($imageResource));
 
         // calculating the part of the image to use for new image
         if ($width->isGreaterThan($height)) {
-            $x         = BigDecimal::zero()->toInt();
-            $y         = $width->minus($height)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
+            $x = BigDecimal::zero()->toInt();
+            $y = $width->minus($height)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
                 ->toInt();
-            $xRect     = BigDecimal::zero()->toInt();
-            $yRect     = $width->minus($height)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
+            $xRect = BigDecimal::zero()->toInt();
+            $yRect = $width->minus($height)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
                 ->plus($height)
                 ->toInt();
             $thumbSize = $width->toInt();
         } else {
-            $x         = $height->minus($width)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
+            $x = $height->minus($width)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
                 ->toInt();
-            $y         = BigDecimal::zero()->toInt();
-            $xRect     = $height->minus($width)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
+            $y = BigDecimal::zero()->toInt();
+            $xRect = $height->minus($width)->dividedBy(BigDecimal::of(2), 0, RoundingMode::HalfUp)
                 ->plus($width)
                 ->toInt();
-            $yRect     = BigDecimal::zero()->toInt();
+            $yRect = BigDecimal::zero()->toInt();
             $thumbSize = $height->toInt();
         }
 
@@ -317,6 +313,11 @@ class ImageComparator
     }
 
     /**
+     * Normalize comparable input into hash bits and average RGB values.
+     * Accepts either an image source/resource or a serialized hash payload.
+     *
+     * @param GdImage|string $image
+     * @param ImageRotationAngle $rotation
      * @return array{hash: int[], color: array{r: int, g: int, b: int}}
      * @throws DivisionByZeroException
      * @throws RoundingNecessaryException
@@ -324,10 +325,9 @@ class ImageComparator
      * @throws NumberFormatException|ImageResourceException
      */
     private function normalizeComparableInput(
-        GdImage|string     $image,
+        GdImage|string $image,
         ImageRotationAngle $rotation = ImageRotationAngle::D0
-    ): array
-    {
+    ): array {
         if (is_string($image) && $this->isSerializedImageHash($image)) {
             if ($rotation !== ImageRotationAngle::D0) {
                 throw new InvalidArgumentException(
@@ -339,18 +339,28 @@ class ImageComparator
         }
 
         return [
-            'hash'  => $this->hashImage($image, $rotation),
+            'hash' => $this->hashImage($image, $rotation),
             'color' => $this->getAverageRGB($image),
         ];
     }
 
+    /**
+     * Check whether the given value is a serialized hash payload.
+     *
+     * @param string $value
+     * @return bool
+     */
     private function isSerializedImageHash(string $value): bool
     {
         return str_starts_with($value, self::SERIALIZED_HASH_PREFIX . ':');
     }
 
     /**
+     * Parse a serialized hash payload into hash bits and RGB channels.
+     *
+     * @param string $serializedHash
      * @return array{hash: int[], color: array{r: int, g: int, b: int}}
+     * @throws InvalidArgumentException
      */
     private function parseSerializedImageHash(string $serializedHash): array
     {
@@ -381,7 +391,7 @@ class ImageComparator
         }
 
         return [
-            'hash'  => array_map('intval', str_split($matches['hash'])),
+            'hash' => array_map('intval', str_split($matches['hash'])),
             'color' => $color,
         ];
     }
@@ -398,7 +408,7 @@ class ImageComparator
             throw new InvalidArgumentException('Hashes must be of the same length.');
         }
 
-        $totalBits  = count($hash1);
+        $totalBits = count($hash1);
         $similarity = BigDecimal::of($totalBits);
 
         foreach ($hash1 as $key => $bit) {
@@ -422,13 +432,12 @@ class ImageComparator
      * @throws NumberFormatException
      */
     private function processImagePixels(
-        GdImage            $imageResource,
-        int                $size,
-        int                $height,
-        int                $width,
+        GdImage $imageResource,
+        int $size,
+        int $height,
+        int $width,
         ImageRotationAngle $rotation = ImageRotationAngle::D0
-    ): array
-    {
+    ): array {
         $pixels = [];
 
         for ($y = 0; $y < $size; $y++) {
@@ -478,7 +487,7 @@ class ImageComparator
     private function calculateSimilarity(array $color1, array $color2): float
     {
         $maxRGBDifference = sqrt(pow(255, 2) + pow(255, 2) + pow(255, 2));
-        $distance         = $this->calculateRGBDistance($color1, $color2);
+        $distance = $this->calculateRGBDistance($color1, $color2);
 
         return 1 - ($distance / $maxRGBDifference);
     }
@@ -488,29 +497,28 @@ class ImageComparator
      */
     private function getAverageRGB(
         GdImage|string $image,
-        int            $size = 8
-    ): array
-    {
-        $image        = $this->normalizeAsResource($image);
+        int $size = 8
+    ): array {
+        $image = $this->normalizeAsResource($image);
         $imageResized = imagescale($image, $size, $size);
 
-        $width  = imagesx($imageResized);
+        $width = imagesx($imageResized);
         $height = imagesy($imageResized);
 
-        $totalRed    = $totalGreen = $totalBlue = 0;
+        $totalRed = $totalGreen = $totalBlue = 0;
         $totalPixels = $width * $height;
 
         for ($y = 0; $y < $height; $y++) {
             for ($x = 0; $x < $width; $x++) {
                 $colorIndex = imagecolorat($imageResized, $x, $y);
 
-                $red   = ($colorIndex >> 16) & 0xFF;
+                $red = ($colorIndex >> 16) & 0xFF;
                 $green = ($colorIndex >> 8) & 0xFF;
-                $blue  = $colorIndex & 0xFF;
+                $blue = $colorIndex & 0xFF;
 
-                $totalRed   += $red;
+                $totalRed += $red;
                 $totalGreen += $green;
-                $totalBlue  += $blue;
+                $totalBlue += $blue;
             }
         }
 

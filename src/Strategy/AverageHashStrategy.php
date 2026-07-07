@@ -17,11 +17,11 @@ class AverageHashStrategy implements HashStrategy
      */
     public function hash(array $pixels): array
     {
-        $hash  = [];
+        $hash = [];
         $index = 0;
 
         $totalPixelsValue = BigDecimal::of(array_sum($pixels));
-        $pixelCount       = BigDecimal::of(count($pixels));
+        $pixelCount = BigDecimal::of(count($pixels));
 
         $averagePixelsValue = $totalPixelsValue->dividedBy($pixelCount, 0, RoundingMode::Down);
 
